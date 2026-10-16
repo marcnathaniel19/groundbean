@@ -44,7 +44,7 @@ Deploy the Java website API on Render
 1. Push this project to GitHub, then create a new Blueprint in Render using the repository containing render.yaml.
 2. Render builds the Docker image and deploys the API. Its health check is /api/health.
 3. The Blueprint names the service goodbean-java-api, so its expected URL is https://goodbean-java-api.onrender.com. If Render assigns a different URL, set window.GOODBEAN_API_URL in api-config.js to the deployed URL, without a trailing slash.
-4. Redeploy the static website on Vercel after changing api-config.js, if needed.
+4. Vercel should deploy the updated website automatically from the latest main-branch push. If it does not, open the Vercel project and redeploy the latest deployment.
 5. The website must be served from an allowed Vercel domain or a local development server; opening index.html directly as a file does not provide a browser origin allowed by the API.
 
 Notes
