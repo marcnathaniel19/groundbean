@@ -358,7 +358,7 @@
           <div class="cash-field visible" id="cash-field"><label for="cash-amount">Cash amount (₱)</label><input id="cash-amount" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Enter amount"></div>
           <p class="error-message" id="payment-error" role="alert"></p>
           <button class="checkout-button" id="pay-button" type="button" disabled>Place order</button>
-          <p class="cart-note">Secure checkout · Made fresh to order</p>
+          <p class="cart-note">Demo checkout · GCash and card payments are simulated</p>
         </aside>
       </section>
     </main>
@@ -393,7 +393,9 @@
     </section>
   </div>
 
+  <script src="api-config.js"></script>
   <script>
+    const API_BASE_URL = String(window.GOODBEAN_API_URL || "").trim().replace(/\/+$/, "");
     const products = [
       { name: "Americano", category: "Espresso", price: 90, image: "images/americano.jpg", imageAlt: "Freshly brewed coffee in a ceramic cup.", description: "Rich espresso, softened with hot water." },
       { name: "Latte", category: "Espresso", price: 120, image: "images/latte.jpg", imageAlt: "A latte with freshly poured milk foam.", description: "Smooth espresso with silky steamed milk." },
@@ -432,7 +434,7 @@
       return 0;
     }
 
-    const state = { cart: [], activeCategory: "All", search: "", selectedProduct: null, oatMilkStock: 5, almondMilkStock: 5, rewardPoints: loadRewardPoints(), completedOrder: false };
+    const state = { cart: [], activeCategory: "All", search: "", selectedProduct: null, oatMilkStock: 5, almondMilkStock: 5, rewardPoints: loadRewardPoints(), completedOrder: false, submitting: false };
 
     function showCurrentPage() {
       const showHome = location.hash === "" || location.hash === "#home";
@@ -474,7 +476,9 @@
       const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
       document.getElementById("cart-count").textContent = count;
       document.getElementById("header-order-count").textContent = count;
-      document.getElementById("pay-button").disabled = count === 0 || state.completedOrder;
+      const payButton = document.getElementById("pay-button");
+      payButton.disabled = count === 0 || state.completedOrder || state.submitting;
+      payButton.textContent = state.submitting ? "Processing…" : "Place order";
       if (count === 0) {
         cartContent.innerHTML = '<div class="cart-empty"><div class="empty-icon" aria-hidden="true">🛍️</div><strong>Your next favorite starts here</strong><span>Add something lovely from the menu.</span></div>';
       } else {
@@ -654,49 +658,90 @@
     document.getElementById("cash-amount").addEventListener("input", () => {
       document.getElementById("payment-error").textContent = "";
     });
-    document.getElementById("pay-button").addEventListener("click", () => {
+    async function submitOrder() {
       if (!state.cart.length || state.completedOrder) return;
       const method = document.querySelector('input[name="payment"]:checked').value;
-      const totals = orderTotals();
-      const total = totals.subtotal - totals.discount;
       const paid = Number(document.getElementById("cash-amount").value);
-      if (method === "Cash" && (!Number.isFinite(paid) || paid < total)) {
-        document.getElementById("payment-error").textContent = `Please enter at least ${money(total)} to continue.`;
+      const errorMessage = document.getElementById("payment-error");
+      errorMessage.textContent = "";
+      if (method === "Cash" && (!Number.isFinite(paid) || paid < 0)) {
+        errorMessage.textContent = "Enter a valid, non-negative cash amount.";
         return;
       }
-      const change = method === "Cash" ? paid - total : 0;
-      const orderNumber = "GB-" + Date.now().toString(36).toUpperCase();
-      const orderDate = new Date();
-      const pointsRedeemed = totals.rewardsDiscount ? 100 : 0;
-      const pointsEarned = Math.floor(total / 10);
-      state.rewardPoints = state.rewardPoints - pointsRedeemed + pointsEarned;
-      state.completedOrder = true;
-      try {
-        localStorage.setItem("goodbean-reward-points", String(state.rewardPoints));
-      } catch (error) {
-        console.error("Unable to save the Goodbean rewards balance.", error);
-        showRewardsStorageError("Your order is complete, but your rewards balance could not be saved on this device.");
+      if (!API_BASE_URL) {
+        errorMessage.textContent = "The Java backend URL is not configured. Set GOODBEAN_API_URL in api-config.js to your Render service URL.";
+        return;
       }
-      document.getElementById("receipt-order-number").textContent = `Order ${orderNumber}`;
-      document.getElementById("receipt-date").textContent = orderDate.toLocaleString();
-      document.getElementById("brew-list").innerHTML = state.cart.map(item => {
-        const details = `${item.milk} · ${item.sweetness}% sweet${item.shots ? ` · ${item.shots} extra shot${item.shots > 1 ? "s" : ""}` : ""}`;
-        return `<li><div>${item.quantity} × ${item.size} ${item.name}<span class="brew-item-detail">${details} · ${money(item.price)} each</span></div><span>${money(item.price * item.quantity)}</span></li>`;
-      }).join("");
-      const receiptRows = [
-        `<div class="receipt-row"><span>Subtotal</span><span>${money(totals.subtotal)}</span></div>`,
-        totals.bulkDiscount ? `<div class="receipt-row"><span>3+ drinks discount</span><span>−${money(totals.bulkDiscount)}</span></div>` : "",
-        totals.idDiscount ? `<div class="receipt-row"><span>Student/staff ID discount</span><span>−${money(totals.idDiscount)}</span></div>` : "",
-        totals.rewardsDiscount ? `<div class="receipt-row"><span>Rewards redemption</span><span>−${money(totals.rewardsDiscount)}</span></div>` : "",
-        `<div class="receipt-row grand"><span>Total</span><span>${money(total)}</span></div>`
-      ];
-      document.getElementById("receipt-totals").innerHTML = receiptRows.join("");
-      document.getElementById("receipt-payment").textContent = `Payment method: ${method}${method === "Cash" ? "" : " (simulated)"}`;
-      document.getElementById("receipt-cash-details").textContent = method === "Cash" ? `Cash received: ${money(paid)} · Change: ${money(change)}` : "";
-      document.getElementById("receipt-rewards").textContent = `Points earned: ${pointsEarned} · Points redeemed: ${pointsRedeemed} · New balance: ${state.rewardPoints} points.${document.getElementById("rewards-storage-notice").hidden ? "" : ` ${document.getElementById("rewards-storage-notice").textContent}`}`;
+
+      state.submitting = true;
       renderCart();
-      document.getElementById("receipt-modal").classList.add("open");
-    });
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/orders`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            items: state.cart.map(item => ({
+              productName: item.name,
+              size: item.size,
+              milk: item.milk,
+              sweetness: Number(item.sweetness),
+              shots: item.shots,
+              quantity: item.quantity
+            })),
+            studentStaffDiscount: document.getElementById("id-discount").checked,
+            redeemRewards: document.getElementById("redeem-rewards").checked,
+            rewardPoints: state.rewardPoints,
+            paymentMethod: method,
+            cashReceived: method === "Cash" ? paid : null
+          })
+        });
+        let result;
+        try {
+          result = await response.json();
+        } catch (error) {
+          console.error("The Java backend returned an invalid response.", error);
+          throw new Error("The Java backend returned an invalid response. Please try again later.");
+        }
+        if (!response.ok) throw new Error(result.message || `The Java backend rejected the order (HTTP ${response.status}).`);
+
+        state.rewardPoints = result.rewardPointsBalance;
+        state.completedOrder = true;
+        try {
+          localStorage.setItem("goodbean-reward-points", String(state.rewardPoints));
+        } catch (error) {
+          console.error("Unable to save the Goodbean rewards balance.", error);
+          showRewardsStorageError("Your order is complete, but your rewards balance could not be saved on this device.");
+        }
+        document.getElementById("receipt-order-number").textContent = `Order ${result.orderNumber}`;
+        document.getElementById("receipt-date").textContent = new Date(result.createdAt).toLocaleString();
+        document.getElementById("brew-list").innerHTML = result.items.map(item => {
+          const details = `${item.milk} · ${item.sweetness}% sweet${item.shots ? ` · ${item.shots} extra shot${item.shots > 1 ? "s" : ""}` : ""}`;
+          return `<li><div>${item.quantity} × ${item.size} ${item.productName}<span class="brew-item-detail">${details} · ${money(item.unitPrice)} each</span></div><span>${money(item.lineTotal)}</span></li>`;
+        }).join("");
+        const receiptRows = [
+          `<div class="receipt-row"><span>Subtotal</span><span>${money(result.subtotal)}</span></div>`,
+          result.bulkDiscount ? `<div class="receipt-row"><span>3+ drinks discount</span><span>−${money(result.bulkDiscount)}</span></div>` : "",
+          result.idDiscount ? `<div class="receipt-row"><span>Student/staff ID discount</span><span>−${money(result.idDiscount)}</span></div>` : "",
+          result.rewardsDiscount ? `<div class="receipt-row"><span>Rewards redemption</span><span>−${money(result.rewardsDiscount)}</span></div>` : "",
+          `<div class="receipt-row grand"><span>Total</span><span>${money(result.total)}</span></div>`
+        ];
+        document.getElementById("receipt-totals").innerHTML = receiptRows.join("");
+        document.getElementById("receipt-payment").textContent = `Payment method: ${method}${method === "Cash" ? "" : " (simulated)"}`;
+        document.getElementById("receipt-cash-details").textContent = method === "Cash" ? `Cash received: ${money(result.cashReceived)} · Change: ${money(result.change)}` : "";
+        document.getElementById("receipt-rewards").textContent = `Points earned: ${result.pointsEarned} · Points redeemed: ${result.pointsRedeemed} · New balance: ${state.rewardPoints} points.${document.getElementById("rewards-storage-notice").hidden ? "" : ` ${document.getElementById("rewards-storage-notice").textContent}`}`;
+        renderCart();
+        document.getElementById("receipt-modal").classList.add("open");
+      } catch (error) {
+        console.error("Unable to submit the Goodbean order.", error);
+        errorMessage.textContent = error instanceof TypeError
+          ? "Unable to reach the Java backend. Check that the Render service is deployed and its URL is correct."
+          : error.message;
+      } finally {
+        state.submitting = false;
+        renderCart();
+      }
+    }
+    document.getElementById("pay-button").addEventListener("click", submitOrder);
     document.getElementById("print-receipt").addEventListener("click", () => window.print());
     document.getElementById("new-order").addEventListener("click", () => {
       state.cart = [];
