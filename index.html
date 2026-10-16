@@ -25,6 +25,10 @@
     button, input { font: inherit; }
     button { cursor: pointer; }
     .page { width: min(1440px, 100%); margin: 0 auto; padding: 0 5.2%; }
+    .page-view[hidden], .site-page[hidden] { display: none; }
+    .landing-page { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 14px; }
+    .landing-hero { width: 100%; min-height: calc(100vh - 28px); min-height: calc(100svh - 28px); margin: 0; padding: clamp(30px, 6vw, 74px); }
+    .menu-home { margin: 25px 0 19px; padding: 0; border: 0; color: var(--green); background: transparent; font-size: 12px; font-weight: 750; }
 
     .topbar { height: 82px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
     .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); text-decoration: none; }
@@ -48,7 +52,6 @@
     .hero-stamp { position: absolute; right: 5%; bottom: 20px; padding: 12px 16px; border-radius: 14px; color: var(--ink); background: var(--white); box-shadow: var(--shadow); font-size: 12px; font-weight: 700; transform: rotate(4deg); }
 
     .main-grid { display: block; padding-bottom: 70px; }
-    .page-view[hidden] { display: none; }
     .order-page { width: min(760px, 100%); margin: 42px auto 70px; }
     .order-heading { margin-bottom: 22px; }
     .order-heading h1 { margin: 0; color: var(--green); font-family: Georgia, "Times New Roman", serif; font-size: 36px; font-weight: 500; }
@@ -177,6 +180,8 @@
       .nav { display: none; }
       .top-order { padding: 10px 14px; }
       .hero { grid-template-columns: 1fr; min-height: 0; margin: 20px 0 32px; padding: 32px 25px 20px; }
+      .landing-page { padding: 10px; }
+      .landing-hero { min-height: calc(100vh - 20px); min-height: calc(100svh - 20px); margin: 0; padding: 30px 25px 20px; }
       .hero h1 { max-width: 450px; font-size: 44px; }
       .hero-art { min-height: 190px; }
       .hero-circle { width: 175px; height: 175px; }
@@ -214,9 +219,24 @@
   </style>
 </head>
 <body>
-  <div class="page">
+  <section class="page-view landing-page" id="home-page" aria-label="Welcome to Goodbean Coffee">
+    <section class="hero landing-hero" aria-labelledby="home-title">
+      <div>
+        <p class="eyebrow">Your neighborhood coffee stop</p>
+        <h1 id="home-title">A little moment<br>made just for you.</h1>
+        <p class="hero-copy">Thoughtfully brewed, happily sipped. Find your favorite, make it yours, and we'll get it started.</p>
+        <button class="hero-button" id="find-favorite" type="button">Find your new favorite &nbsp;→</button>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="hero-circle"><div class="hero-cup">☕</div></div>
+        <div class="hero-stamp">Freshly made, every time ✦</div>
+      </div>
+    </section>
+  </section>
+
+  <div class="page site-page" id="site-page" hidden>
     <header class="topbar">
-      <a class="brand" href="#menu" aria-label="Goodbean home">
+      <a class="brand" href="#home" aria-label="Goodbean home">
         <span class="brand-mark" aria-hidden="true">☕</span>
         <span class="brand-name">good<span>bean</span></span>
       </a>
@@ -225,39 +245,26 @@
 
     <main>
       <div class="page-view" id="menu-page">
-      <section class="hero" id="about">
-        <div>
-          <p class="eyebrow">Your neighborhood coffee stop</p>
-          <h1>A little moment<br>made just for you.</h1>
-          <p class="hero-copy">Thoughtfully brewed, happily sipped. Find your favorite, make it yours, and we'll get it started.</p>
-          <button class="hero-button" type="button" onclick="document.querySelector('#menu').scrollIntoView({behavior:'smooth'})">Find your new favorite &nbsp;→</button>
+        <button class="menu-home" id="back-to-home" type="button">← Home</button>
+        <div class="main-grid">
+          <section id="menu" aria-labelledby="menu-title">
+            <div class="section-heading">
+              <div><h2 id="menu-title">The good stuff</h2><p>Made with care. Picked by you.</p></div>
+              <span class="open-label">Taking orders</span>
+            </div>
+            <div class="categories" aria-label="Filter menu">
+              <button class="category active" type="button" data-category="All">Everything</button>
+              <button class="category" type="button" data-category="Espresso">Espresso</button>
+              <button class="category" type="button" data-category="Tea">Tea</button>
+              <button class="category" type="button" data-category="Frappuccino">Frappuccino</button>
+            </div>
+            <div class="menu-tools">
+              <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="menu-search" type="search" placeholder="Search your favorite drink…" aria-label="Search drinks"></label>
+              <span class="result-count" id="result-count" aria-live="polite">9 drinks</span>
+            </div>
+            <div class="products" id="products"></div>
+          </section>
         </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="hero-circle"><div class="hero-cup">☕</div></div>
-          <div class="hero-stamp">Freshly made, every time ✦</div>
-        </div>
-      </section>
-
-      <div class="main-grid">
-        <section id="menu" aria-labelledby="menu-title">
-          <div class="section-heading">
-            <div><h2 id="menu-title">The good stuff</h2><p>Made with care. Picked by you.</p></div>
-            <span class="open-label">Taking orders</span>
-          </div>
-          <div class="categories" aria-label="Filter menu">
-            <button class="category active" type="button" data-category="All">Everything</button>
-            <button class="category" type="button" data-category="Espresso">Espresso</button>
-            <button class="category" type="button" data-category="Tea">Tea</button>
-            <button class="category" type="button" data-category="Frappuccino">Frappuccino</button>
-          </div>
-          <div class="menu-tools">
-            <label class="search-wrap"><span aria-hidden="true">⌕</span><input id="menu-search" type="search" placeholder="Search your favorite drink…" aria-label="Search drinks"></label>
-            <span class="result-count" id="result-count" aria-live="polite">9 drinks</span>
-          </div>
-          <div class="products" id="products"></div>
-        </section>
-
-      </div>
       </div>
 
       <section class="page-view order-page" id="order-page" hidden aria-labelledby="order-title">
@@ -367,10 +374,13 @@
     const state = { cart: [], activeCategory: "All", search: "", selectedProduct: null, oatMilkStock: 5, almondMilkStock: 5, rewardPoints: loadRewardPoints(), completedOrder: false };
 
     function showCurrentPage() {
+      const showHome = location.hash === "" || location.hash === "#home";
       const showOrder = location.hash === "#order";
-      document.getElementById("menu-page").hidden = showOrder;
+      document.getElementById("home-page").hidden = !showHome;
+      document.getElementById("site-page").hidden = showHome;
+      document.getElementById("menu-page").hidden = showHome || showOrder;
       document.getElementById("order-page").hidden = !showOrder;
-      if (showOrder) window.scrollTo(0, 0);
+      if (showHome || showOrder || location.hash === "#menu") window.scrollTo(0, 0);
     }
 
     function renderProducts() {
@@ -568,6 +578,12 @@
     document.getElementById("redeem-rewards").addEventListener("change", renderCart);
     document.getElementById("back-to-menu").addEventListener("click", () => {
       location.hash = "#menu";
+    });
+    document.getElementById("find-favorite").addEventListener("click", () => {
+      location.hash = "#menu";
+    });
+    document.getElementById("back-to-home").addEventListener("click", () => {
+      location.hash = "#home";
     });
     document.querySelectorAll('input[name="payment"]').forEach(input => input.addEventListener("change", () => {
       document.getElementById("cash-field").classList.toggle("visible", input.value === "Cash" && input.checked);
