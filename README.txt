@@ -11,7 +11,7 @@ Website improvements included
 - Fixed the Frappuccino product-art background class.
 - Improved cart alternative-milk stock handling when increasing, decreasing, or removing cart items.
 - Moved the order summary and payment checkout to a separate page from the menu.
-- Made the welcome hero a full-screen homepage; the menu opens from its featured button.
+- Made the welcome hero a full-screen homepage with larger headline, supporting copy, coffee artwork, and service highlights; the menu opens from its featured button.
 - Added itemized, printable receipts with order references, payment details, discounts, and change.
 - Added a browser-saved rewards balance: earn 1 point per ₱10 spent and redeem 100 points for ₱50 off orders of at least ₱50.
 - Applied the forest-green (#305B43), warm-cream (#F6F2EB), caramel (#F4C38D), and white (#FFFFFF) brand palette throughout the website.
