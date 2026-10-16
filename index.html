@@ -220,12 +220,7 @@
         <span class="brand-mark" aria-hidden="true">☕</span>
         <span class="brand-name">good<span>bean</span></span>
       </a>
-      <nav class="nav" aria-label="Main navigation">
-        <a href="#menu">Our menu</a>
-        <a href="#about">Our story</a>
-        <a href="#order">Your order (<span id="header-order-count">0</span>)</a>
-      </nav>
-      <button class="top-order" type="button" onclick="location.hash='#order'">Your order · <span id="header-order-count-mobile">0</span></button>
+      <button class="top-order" type="button" aria-label="Open cart" onclick="location.hash='#order'">Cart · <span id="header-order-count">0</span></button>
     </header>
 
     <main>
@@ -407,7 +402,6 @@
       const count = state.cart.reduce((sum, item) => sum + item.quantity, 0);
       document.getElementById("cart-count").textContent = count;
       document.getElementById("header-order-count").textContent = count;
-      document.getElementById("header-order-count-mobile").textContent = count;
       document.getElementById("pay-button").disabled = count === 0 || state.completedOrder;
       if (count === 0) {
         cartContent.innerHTML = '<div class="cart-empty"><div class="empty-icon" aria-hidden="true">🛍️</div><strong>Your next favorite starts here</strong><span>Add something lovely from the menu.</span></div>';
