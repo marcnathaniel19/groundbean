@@ -3,6 +3,8 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn -B dependency:go-offline
 COPY src ./src
+COPY index.html api-config.js ./src/main/resources/static/
+COPY images ./src/main/resources/static/images/
 RUN mvn -B package
 
 FROM eclipse-temurin:21-jre-alpine

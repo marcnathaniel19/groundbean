@@ -16,15 +16,6 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    @GetMapping("/")
-    public Map<String, String> root() {
-        return Map.of(
-                "service", "Goodbean Coffee API",
-                "status", "ok",
-                "health", "/api/health",
-                "menu", "/api/menu");
-    }
-
     @GetMapping("/api/health")
     public Map<String, String> health() {
         return Map.of("status", "ok");

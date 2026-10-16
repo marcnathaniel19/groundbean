@@ -22,7 +22,7 @@ Website improvements included
 Java improvement included
 - Validated cash input to reject negative, NaN, and infinite values.
 - Added a Spring Boot HTTP API with health and menu endpoints.
-- Added a Dockerfile and Render Blueprint for deploying the Java API in Singapore.
+- Added a Dockerfile for deploying the Java backend and website together on Render.
 
 Run the website
 1. Extract this folder.
@@ -40,16 +40,15 @@ Run the Java website API locally
 3. Set window.GOODBEAN_API_URL in api-config.js to http://localhost:10000.
 4. Serve the website from http://localhost:5500 or http://localhost:5173.
 
-Deploy the Java website API on Render
-1. Push this project to GitHub, then create a new Blueprint in Render using the repository containing render.yaml.
-2. Render builds the Docker image and deploys the API. Its health check is /api/health.
-3. The Blueprint names the service goodbean-java-api, so its expected URL is https://goodbean-java-api.onrender.com. If Render assigns a different URL, set window.GOODBEAN_API_URL in api-config.js to the deployed URL, without a trailing slash.
-4. Vercel should deploy the updated website automatically from the latest main-branch push. If it does not, open the Vercel project and redeploy the latest deployment.
-5. The website must be served from an allowed Vercel domain or a local development server; opening index.html directly as a file does not provide a browser origin allowed by the API.
+Deploy the website and Java API together on Render
+1. Push this project to GitHub and deploy the repository's Dockerfile as a Render web service.
+2. The Docker image bundles index.html and drink photos with the Java API.
+3. Open the Render service URL (for example, https://goodbean-java-api.onrender.com/) to see the website. The API health check remains at /api/health.
+4. The same website can remain deployed on Vercel; api-config.js automatically uses the same-origin API on Render and the Render API URL on Vercel.
 
 Notes
 - GCash and card payment are simulations only; this project does not process real payments.
 - Receipts can be printed or saved as PDF using the browser's print dialog. Rewards balances are stored in the current browser on this device; there are no customer accounts or cross-device syncing.
 - Student/staff ID eligibility is represented by a checkbox in the demo and is not externally verified.
-- The legacy CoffeeKiosk.java console program remains a separate demonstration. The website calls the new Spring Boot API instead.
+- The legacy CoffeeKiosk.java console program remains a separate demonstration. The deployed website calls the Spring Boot API instead.
 - Orders are not stored in a database, rewards are still browser-local, and payment methods other than cash remain simulated. The Render API is a demo backend, not production payment processing.
