@@ -3,14 +3,12 @@ package com.goodbean.api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
 public class OrderController {
     private final OrderService orderService;
 
@@ -27,17 +25,17 @@ public class OrderController {
                 "menu", "/api/menu");
     }
 
-    @GetMapping("/health")
+    @GetMapping("/api/health")
     public Map<String, String> health() {
         return Map.of("status", "ok");
     }
 
-    @GetMapping("/menu")
+    @GetMapping("/api/menu")
     public List<MenuCatalog.Product> menu() {
         return MenuCatalog.all();
     }
 
-    @PostMapping("/orders")
+    @PostMapping("/api/orders")
     public OrderResponse createOrder(@RequestBody OrderRequest request) {
         return orderService.createOrder(request);
     }
