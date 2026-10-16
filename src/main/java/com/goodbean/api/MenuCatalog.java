@@ -19,7 +19,7 @@ public final class MenuCatalog {
     }
 
     public static List<Product> all() {
-        return List.copyOf(PRODUCTS.values());
+        return PRODUCTS;
     }
 
     public static Product find(String name) {
