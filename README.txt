@@ -7,6 +7,7 @@ Files
 Website improvements included
 - Added a live menu search field and result count.
 - Added an empty-search-results state.
+- Improved the menu with clearer headings, larger drink photos, category badges, responsive filters, and prominent customization buttons.
 - Replaced drink icons with optimized local drink photographs from Unsplash.
 - Fixed the Frappuccino product-art background class.
 - Improved cart alternative-milk stock handling when increasing, decreasing, or removing cart items.
